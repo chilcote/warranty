@@ -17,14 +17,14 @@ WarrantyTempFile="/tmp/warranty.txt"
 AsdCheck="/tmp/asdcheck.txt"
 
 if [[ $# == 0 ]] ; then
-	SerialNumber=`system_profiler SPHardwareDataType | grep "Serial Number" | awk -F ': ' {'print $2'} 2>/dev/null`
+	SerialNumber=`system_profiler SPHardwareDataType | grep "Serial Number" | grep -v "tray" |  awk -F ': ' {'print $2'} 2>/dev/null`
 else
 	SerialNumber="${1}"
 fi
 
 [[ -n "${SerialNumber}" ]] && WarrantyInfo=`curl -k -s "https://selfsolve.apple.com/Warranty.do?serialNumber=${SerialNumber}&country=USA&fullCountryName=United%20States" | awk '{gsub(/\",\"/,"\n");print}' | awk '{gsub(/\":\"/,":");print}' > ${WarrantyTempFile}`
 
-curl https://github.com/chilcote/warranty/raw/master/asdcheck -o ${AsdCheck} > /dev/null 2>&1
+curl -k -s https://github.com/chilcote/warranty/raw/master/asdcheck -o ${AsdCheck} > /dev/null 2>&1
 
 #################
 ##  FUNCTIONS  ##
