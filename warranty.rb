@@ -38,7 +38,7 @@ if ARGV.size > 0 then
   end
 else
   puts "Without your input, we'll use this machine's serial number."
-  serial = %x(system_profiler SPHardwareDataType | awk '/Serial/ {print $4}').upcase.chomp
+  serial = %x(system_profiler SPHardwareDataType |grep -v tray |awk '/Serial/ {print $4}').upcase.chomp
   get_warranty(serial)
 end
 
