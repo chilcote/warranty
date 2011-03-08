@@ -7,6 +7,7 @@
 # 		https://github.com/huronschools/scripts/blob/master/ruby/warranty.rb
 
 require 'open-uri'
+require 'date'
 
 def get_warranty(serial)
   hash = {}
@@ -18,9 +19,12 @@ def get_warranty(serial)
     }
     
     puts "\nSerial Number:\t\t#{hash['SERIAL_ID']}\n"
-    puts "Product Decription:\t#{hash['PROD_DESCR']}\n"
-    puts "Purchase date:\t\t#{hash['PURCHASE_DATE'].gsub("-",".")}"
-    puts (!hash['COV_END_DATE'].empty?) ? "Coverage end:\t\t#{hash['COV_END_DATE'].gsub("-",".")}\n" : "Coverage end:\t\tEXPIRED\n"
+    puts "Product Description:\t#{hash['PROD_DESCR']}\n"
+    puts "Warranty Type:\t\t#{hash['HW_COVERAGE_DESC']}\n"
+    puts "Purchase date:\t\t#{hash['PURCHASE_DATE']}"
+    (!hash['COV_END_DATE'].empty?) ? coverage = "#{hash['COV_END_DATE']}\n" : coverage = "EXPIRED"
+    str = "#{hash['HW_END_DATE']}"
+    puts (!hash['HW_END_DATE']) ? "Coverage end:\t\t#{coverage}\n" : "Coverage end:\t\t#{Date.parse str}\n"
   }
   
 # Import the latest list of ASD versions and match the PROD_DESCR with the correct ASD
