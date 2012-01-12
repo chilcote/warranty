@@ -20,10 +20,13 @@ def get_warranty(serial)
   puts "\nSerial Number:\t\t#{warranty_data['SERIAL_ID']}\n"
   puts "Product Description:\t#{warranty_data['PROD_DESCR']}\n"
   puts "Warranty Type:\t\t#{warranty_data['HW_COVERAGE_DESC']}\n"
-  puts "Purchase date:\t\t#{warranty_data['PURCHASE_DATE']}"
-  (!warranty_data['COV_END_DATE'].empty?) ? coverage = "#{warranty_data['COV_END_DATE']}\n" : coverage = "EXPIRED"
-  str = "#{warranty_data['HW_END_DATE']}"
-  puts (!warranty_data['HW_END_DATE']) ? "Coverage end:\t\t#{coverage}\n" : "Coverage end:\t\t#{Date.parse str}\n"
+  puts "Purchase date:\t\t#{warranty_data['PURCHASE_DATE'].gsub("-",".")}"
+  
+  unless warranty_data['COV_END_DATE'].empty?
+    puts "Coverage end:\t\t#{warranty_data['COV_END_DATE'].gsub("-",".")}\n"
+  else
+    puts "Coverage end:\t\tEXPIRED\n"
+  end
   
 # Import the latest list of ASD versions and match the PROD_DESCR with the correct ASD
   asd_hash = {}
