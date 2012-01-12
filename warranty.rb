@@ -6,26 +6,24 @@
 # Edit:		This is a fork @glarizza's script:
 # 		https://github.com/huronschools/scripts/blob/master/ruby/warranty.rb
 
+require 'rubygems'
 require 'open-uri'
+require 'openssl'
+require 'json'
 require 'date'
 
 def get_warranty(serial)
-  hash = {}
-  open('https://selfsolve.apple.com/warrantyChecker.do?sn=' + serial.upcase + '&country=USA') {|item|
-    item.each_line {|item|}
-    warranty_array = item.strip.split('"')
-    warranty_array.each {|array_item|
-      hash[array_item] = warranty_array[warranty_array.index(array_item) + 2] if array_item =~ /[A-Z][A-Z\d]+/
-    }
+  warranty_data = {}
+  raw_data = open('https://selfsolve.apple.com/warrantyChecker.do?sn=' + serial.upcase + '&country=USA')
+  warranty_data = JSON.parse(raw_data.string[5..-2])
     
-    puts "\nSerial Number:\t\t#{hash['SERIAL_ID']}\n"
-    puts "Product Description:\t#{hash['PROD_DESCR']}\n"
-    puts "Warranty Type:\t\t#{hash['HW_COVERAGE_DESC']}\n"
-    puts "Purchase date:\t\t#{hash['PURCHASE_DATE']}"
-    (!hash['COV_END_DATE'].empty?) ? coverage = "#{hash['COV_END_DATE']}\n" : coverage = "EXPIRED"
-    str = "#{hash['HW_END_DATE']}"
-    puts (!hash['HW_END_DATE']) ? "Coverage end:\t\t#{coverage}\n" : "Coverage end:\t\t#{Date.parse str}\n"
-  }
+  puts "\nSerial Number:\t\t#{warranty_data['SERIAL_ID']}\n"
+  puts "Product Description:\t#{warranty_data['PROD_DESCR']}\n"
+  puts "Warranty Type:\t\t#{warranty_data['HW_COVERAGE_DESC']}\n"
+  puts "Purchase date:\t\t#{warranty_data['PURCHASE_DATE']}"
+  (!warranty_data['COV_END_DATE'].empty?) ? coverage = "#{warranty_data['COV_END_DATE']}\n" : coverage = "EXPIRED"
+  str = "#{warranty_data['HW_END_DATE']}"
+  puts (!warranty_data['HW_END_DATE']) ? "Coverage end:\t\t#{coverage}\n" : "Coverage end:\t\t#{Date.parse str}\n"
   
 # Import the latest list of ASD versions and match the PROD_DESCR with the correct ASD
   asd_hash = {}
@@ -33,7 +31,7 @@ def get_warranty(serial)
     asd_arrary = line.split(":")
     asd_hash[asd_arrary[0]] = asd_arrary[1]
   end
-  puts "ASD Version:\t\t#{asd_hash[hash['PROD_DESCR']]}\n"
+  puts "ASD Version:\t\t#{asd_hash[warranty_data['PROD_DESCR']]}\n"
 end
 
 if ARGV.size > 0 then
