@@ -1,37 +1,71 @@
 #!/usr/bin/env ruby
 #
-# File: 	warranty.rb
-# Decription: 	Contact's Apple's selfserve servers to capture warranty information
-#              	about your product. Accepts arguments of machine serial numbers.
-# Edit:		This is a fork @glarizza's script:
-# 		https://github.com/huronschools/scripts/blob/master/ruby/warranty.rb
-
-require 'rubygems'
+# File:        warranty.rb¬
+# Decription:  Contacts Apple's selfserve servers to capture warranty information¬
+#              about your product. Accepts arguments of machine serial numbers.¬
+# Edit:        This is a fork @glarizza's script:¬
+#              https://github.com/glarriza/scripts/blob/master/ruby/warranty.rb¬
+require 'uri'
 require 'open-uri'
-require 'openssl'
-require 'json'
+require 'net/http'
+require 'net/https'
 require 'date'
 
 def get_warranty(serial)
-  warranty_data = {}
-  raw_data = open('https://selfsolve.apple.com/warrantyChecker.do?sn=' + serial.upcase + '&country=USA')
-  warranty_data = JSON.parse(raw_data.string[5..-2])
-    
-  puts "\nSerial Number:\t\t#{warranty_data['SERIAL_ID']}\n"
-  puts "Product Description:\t#{warranty_data['PROD_DESCR']}\n"
-  puts "Warranty Type:\t\t#{warranty_data['HW_COVERAGE_DESC']}\n"
-  puts "Purchase date:\t\t#{warranty_data['PURCHASE_DATE']}"
-  (!warranty_data['COV_END_DATE'].empty?) ? coverage = "#{warranty_data['COV_END_DATE']}\n" : coverage = "EXPIRED"
-  str = "#{warranty_data['HW_END_DATE']}"
-  puts (!warranty_data['HW_END_DATE']) ? "Coverage end:\t\t#{coverage}\n" : "Coverage end:\t\t#{Date.parse str}\n"
+  # Setup HTTP connection
+  uri              = URI.parse('https://selfsolve.apple.com/wcResults.do')
+  http             = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl     = true
+  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  request          = Net::HTTP::Post.new(uri.request_uri)
+
+  # Prepare POST data
+  request.set_form_data(
+    {
+      'sn'       => serial,
+      'Continue' => 'Continue',
+      'cn'       => '',
+      'locale'   => '',
+      'caller'   => '',
+      'num'      => '0'
+    }
+  )
+
+  # POST data and get the response
+  response      = http.request(request)
+  response_data = response.body
+
+  # I apologize for this line
+  warranty_status = response_data.split('warrantyPage.warrantycheck.displayHWSupportInfo').last.split('Repairs and Service Coverage: ')[1] =~ /^Active/ ? true : false
+
+  # And this one too
+  expiration_date = response_data.split('Estimated Expiration Date: ')[1].split('<')[0] if warranty_status
   
-# Import the latest list of ASD versions and match the PROD_DESCR with the correct ASD
+  # Get product description from http://support-sp.apple.com/sp/product
+  snippet = serial[-3,3]
+  snippet = serial[-4,4] if serial.length == 12
+  open('http://support-sp.apple.com/sp/product?cc=' + snippet + '&lang=en_US').each do |line|
+    @prod_descr = line.split('Code>')[1].split('</config')[0]
+  end
+
+  # Import the latest list of ASD versions and match the prod_descr with the correct ASD
   asd_hash = {}
   open('https://github.com/chilcote/warranty/raw/master/asdcheck').each do |line|
     asd_arrary = line.split(":")
     asd_hash[asd_arrary[0]] = asd_arrary[1]
   end
-  puts "ASD Version:\t\t#{asd_hash[warranty_data['PROD_DESCR']]}\n"
+  
+  #puts "\n#{response_data}\t"
+  puts "\nProduct Description:\t#{@prod_descr}"
+  puts "Serial Number:\t\t#{serial}"
+  puts "Expires:\t\t" + (warranty_status ? "#{Date.parse expiration_date}" : 'Expired')
+  puts "ASD Version:\t\t#{asd_hash[@prod_descr]}\n"
+
+  #TODO: 
+  #  Calculate Purchase Date
+  #  Trap for Limited warranty or Applecare
+  #  Catch invalid Serial Numbers
+
 end
 
 if ARGV.size > 0 then
@@ -40,7 +74,6 @@ if ARGV.size > 0 then
   end
 else
   puts "Without your input, we'll use this machine's serial number."
-  serial = %x(system_profiler SPHardwareDataType |grep -v tray |awk '/Serial/ {print $4}').upcase.chomp
+  serial = %x(system_profiler SPHardwareDataType | awk '/Serial/ {print $4}').upcase.chomp
   get_warranty(serial)
 end
-
