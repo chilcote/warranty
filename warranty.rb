@@ -11,6 +11,20 @@ require 'net/http'
 require 'net/https'
 require 'date'
 
+def get_prod_descr(serial)
+  # Get product description from http://support-sp.apple.com/sp/product
+  begin
+    snippet = serial[-3,3]
+    snippet = serial[-4,4] if serial.length == 12
+    open('http://support-sp.apple.com/sp/product?cc=' + snippet + '&lang=en_US').each do |line|
+      @prod_descr = line.split('Code>')[1].split('</config')[0]
+    end
+    get_warranty(serial)
+  rescue
+    puts "ERROR:\tPlease check serial number and try again."
+  end
+end
+
 def get_warranty(serial)
   # Setup HTTP connection
   uri              = URI.parse('https://selfsolve.apple.com/wcResults.do')
@@ -35,20 +49,10 @@ def get_warranty(serial)
   response      = http.request(request)
   response_data = response.body
 
-  # I apologize for this line
   warranty_status = response_data.split('warrantyPage.warrantycheck.displayHWSupportInfo').last.split('Repairs and Service Coverage: ')[1] =~ /^Active/ ? true : false
-
-  # And this one too
   expiration_date = response_data.split('Estimated Expiration Date: ')[1].split('<')[0] if warranty_status
   
-  # Get product description from http://support-sp.apple.com/sp/product
-  snippet = serial[-3,3]
-  snippet = serial[-4,4] if serial.length == 12
-  open('http://support-sp.apple.com/sp/product?cc=' + snippet + '&lang=en_US').each do |line|
-    @prod_descr = line.split('Code>')[1].split('</config')[0]
-  end
-
-  # Import the latest list of ASD versions and match the prod_descr with the correct ASD
+  # Import ASD versions and match correct version with prod_descr
   asd_hash = {}
   open('https://github.com/chilcote/warranty/raw/master/asdcheck').each do |line|
     asd_arrary = line.split(":")
@@ -64,16 +68,14 @@ def get_warranty(serial)
   #TODO: 
   #  Calculate Purchase Date
   #  Trap for Limited warranty or Applecare
-  #  Catch invalid Serial Numbers
-
 end
 
 if ARGV.size > 0 then
   serial = ARGV.each do |serial|
-    get_warranty(serial.upcase)
+    get_prod_descr(serial.upcase)
   end
 else
   puts "Without your input, we'll use this machine's serial number."
   serial = %x(system_profiler SPHardwareDataType | awk '/Serial/ {print $4}').upcase.chomp
-  get_warranty(serial)
+  get_prod_descr(serial)
 end
