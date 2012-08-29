@@ -19,9 +19,28 @@ def get_prod_descr(serial)
     open('http://support-sp.apple.com/sp/product?cc=' + snippet + '&lang=en_US').each do |line|
       @prod_descr = line.split('Code>')[1].split('</config')[0]
     end
+    estimate_manufactured_date(serial)
     get_warranty(serial)
   rescue
     puts "ERROR:\tPlease check serial number and try again."
+  end
+end
+
+def estimate_manufactured_date(serial)
+  if serial.length == 11
+    year = serial[2,1]
+    est_year = 2000 + '   3456789012'.index(year)
+    week = serial[3,2].to_i
+    @est_date = Date.commercial(est_year, week, 1)
+  elsif serial.length == 12
+    year_code = 'cdfghjklmnpqrstvwxyz'
+    year = serial[3,1].downcase
+    est_year = 2010 + (year_code.index(year) / 2)
+    est_half = year_code.index(year) % 2
+    week_code = ' 123456789cdfghjklmnpqrtvwxy'
+    week = serial[4,1].downcase
+    est_week = week_code.index(week) + (est_half * 26)
+    @est_date = Date.commercial(est_year, est_week, 1)
   end
 end
 
@@ -60,9 +79,11 @@ def get_warranty(serial)
   end
   
   #puts "\n#{response_data}\t"
+  #puts ":#{@prod_descr}" + ":#{serial}" + ":" + (warranty_status ? "#{Date.parse expiration_date}" : 'Expired') + ":#{asd_hash[@prod_descr]}"
   puts "\nProduct Description:\t#{@prod_descr}"
   puts "Serial Number:\t\t#{serial}"
   puts "Expires:\t\t" + (warranty_status ? "#{Date.parse expiration_date}" : 'Expired')
+  puts "Manufactured (Est.):\t#{@est_date}" if not warranty_status
   puts "ASD Version:\t\t#{asd_hash[@prod_descr]}\n"
 
   #TODO: 
@@ -76,6 +97,6 @@ if ARGV.size > 0 then
   end
 else
   puts "Without your input, we'll use this machine's serial number."
-  serial = %x(system_profiler SPHardwareDataType | awk '/Serial/ {print $4}').upcase.chomp
+  serial = %x(system_profiler SPHardwareDataType |grep -v tray |awk '/Serial/ {print $4}').upcase.chomp
   get_prod_descr(serial)
 end
