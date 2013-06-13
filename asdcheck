@@ -37,23 +37,23 @@ MacBook Pro (17-inch Early 2008):3S123
 MacBook Air:3S123
 Mac Pro (Early 2008):3S123
 MacBook (13-inch Late 2007):3S123
-MacBook (13-inch, Aluminum, Late 2008):3S132
-MacBook Pro (17-inch, Late 2008):3S132
-MacBook Pro (15-inch, Late 2008):3S132
-MacBook Air (Late 2008):3S132
-MacBook (13-inch, Early 2009):3S132
-MacMini (Early 2009):3S132
-iMac (20-inch, Early 2009):3S132
-iMac (24-inch, Early 2009):3S132
-iMac (Mid 2009):3S132
+MacBook (13-inch, Aluminum, Late 2008):3S132A
+MacBook Pro (17-inch, Late 2008):3S132A
+MacBook Pro (15-inch, Late 2008):3S132A
+MacBook Air (Late 2008):3S132A
+MacBook (13-inch, Early 2009):3S132A
+MacMini (Early 2009):3S132A
+iMac (20-inch, Early 2009):3S132A
+iMac (24-inch, Early 2009):3S132A
+iMac (20-inch, Mid 2009):3S132A
 MacBook Pro (17-inch, Early 2009):3S132
-Mac Pro (Early 2009):3S132
-MacBook (13-inch, Mid 2009):3S132
-MacBook Air (Mid 2009):3S132
-MacBook Pro (17-inch, Mid 2009):3S132
-MacBook Pro (15-inch, Mid 2009):3S132
-MacBook Pro (15-inch, 2.53GHz, Mid 2009):3S132
-MacBook Pro (13-inch, Mid 2009):3S132
+Mac Pro (Early 2009):3S132A
+MacBook (13-inch, Mid 2009):3S132A
+MacBook Air (Mid 2009):3S132A
+MacBook Pro (17-inch, Mid 2009):3S132A
+MacBook Pro (15-inch, Mid 2009):3S132A
+MacBook Pro (15-inch, 2.53GHz, Mid 2009):3S132A
+MacBook Pro (13-inch, Mid 2009):3S132A
 Mac mini (Late 2009):3S138
 MacBook (13-inch, Late 2009):3S138
 iMac (21.5-inch, Late 2009):3S138
@@ -80,8 +80,18 @@ iMac (21.5-inch, Late 2011):3S147
 MacBook Pro (13-inch, Late 2011):3S148
 MacBook Pro (15-inch, Late 2011):3S148
 MacBook Pro (17-inch, Late 2011):3S148
-MacBook Pro (Retina, Mid 2012):3S150
-MacBook Air (13-inch, Mid 2012):3S150
-MacBook Air (11-inch, Mid 2012):3S150
-MacBook Pro (15-inch, Mid 2012):3S150
-MacBook Pro (13-inch, Mid 2012):3S150
+Mac Pro (Mid 2012):3S149
+iMac (21.5-inch, Late 2012):3S152
+iMac (27-inch, Late 2012):3S152
+Mac mini (Late 2012):3S152
+Mac mini Server (Late 2012):3S152
+MacBook Pro (Retina, Mid 2012):3S155
+MacBook Air (13-inch, Mid 2012):3S155
+MacBook Air (11-inch, Mid 2012):3S155
+MacBook Pro (15-inch, Mid 2012):3S155
+MacBook Pro (13-inch, Mid 2012):3S155
+MacBook Pro (Retina, 13-inch, Early 2013):3S155
+MacBook Pro (Retina, 15-inch, Early 2013):3S155
+iMac (21.5-inch, Early 2013):3S155
+MacBook Air (13-inch, Mid 2013):S3156
+MacBook Air (11-inch, Mid 2013):S3156
