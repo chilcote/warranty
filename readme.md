@@ -1,35 +1,47 @@
-#warranty.rb
+warranty
+========
 
-warranty.rb accepts arguments of machine serial numbers and contacts Apple's selfserve servers to return warranty information. If no serial is provided, it will use the serial from the current mac.
+Apple warranty lookup script.
 
-All of the good ideas herein came from [glarizza][1], except for the rest of the good ideas which came from [pudquick][2].
+This script scrapes Apple's warranty self serve site to determine whether a
+given serial number is under warranty. Input can be one or more given 
+serial numbers, or a text file listing serials. Output can be standard out
+or a CSV file.
 
-##Sample serials to use for troubleshooting:
+All of the good ideas herein came from [glarizza][1], except for the rest of the good ideas which came from [pudquick][2]. Every terrible idea is my own.
 
-Product Description: MacBook Pro (15-inch, Mid 2009)  
-Serial Number: W80090N064C  
-Expires: 2013-03-01  
-ASD Version: 3S132  
+Usage
+-----------
 
-Product Description: MacBook (13-inch Late 2006)  
-Serial Number: 4H64872FWGL  
-Expirespires: Expired  
-ASD Version: 3S116  
+	usage: warranty [-h] [-i INPUT] [-o OUTPUT] ...
 
-Product Description:	MacBook Pro (15-inch, Early 2011)  
-Serial Number: C02F83SDDF8X  
-Expires: 2014-02-24  
-ASD Version: 3S144  
+	positional arguments:
+	  serials
 
-Product Description: MacBook Pro (15-inch, Mid 2010)  
-Serial Number: W80493AFAGZ  
-Expires: 2013-12-05  
-ASD Version: 3S138  
+	optional arguments:
+	  -h, --help            show this help message and exit
+	  -i INPUT, --input INPUT
+	                        import serials from a file
+	  -o OUTPUT, --output OUTPUT
+	                        save output to a csv file
 
-Product Description:	MacBook Pro (15-inch Early 2008)  
-Serial Number: W881116PYK0  
-Expires: Expired  
-ASD Version: 3S123  
+
+License
+-------
+
+	Copyright 2014 Joseph Chilcote
+	
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+	
+		http://www.apache.org/licenses/LICENSE-2.0
+	
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
 
 [1]: https://github.com/glarizza/scripts/blob/master/ruby/warranty.rb "glarizza"
 [2]: https://github.com/pudquick/pyMacWarranty/blob/master/getwarranty.py "pudquick"

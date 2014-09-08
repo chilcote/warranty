@@ -1,0 +1,160 @@
+#!/usr/bin/python
+
+##############################################################################
+# Copyright 2014 Joseph Chilcote
+# 
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+#  use this file except in compliance with the License. You may obtain a copy
+#  of the License at  
+# 
+#       http://www.apache.org/licenses/LICENSE-2.0
+# 
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+##############################################################################
+
+## Warranty site
+## https://selfsolve.apple.com/wcResults.do?sn=SERIAL&Continue=Continue&cn=&locale=&caller=&num=0
+
+'''
+Apple warranty lookup script.
+
+This script scrapes Apple's warranty self serve site to determine whether a
+given serial number is under warranty. Input can be one or more given 
+serial numbers, or a text file listing serials. Output can be standard out
+or a CSV file.
+
+usage: warranty [-h] [-i INPUT] [-o OUTPUT] ...
+
+positional arguments:
+  serials
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        import serials from a file
+  -o OUTPUT, --output OUTPUT
+                        save output to a csv file
+'''
+
+import os
+import sys
+import subprocess
+import plistlib
+from dateutil import parser
+from optparse import OptionParser
+import argparse
+
+# inspired by @mikeymikey -- https://github.com/pudquick/pyMacWarranty
+import xml.etree.ElementTree as ET
+try:
+    import requests
+except:
+    import urllib, types
+    import urllib2 as requests
+    setattr(requests,'content','')
+    def get(self, urlstr, params={}):
+        if (params):
+            urlstr += "?%s" % urllib.urlencode(params)
+        self.content = self.urlopen(urlstr).read()
+        return self
+    requests.get = types.MethodType(get,requests)
+
+def get_asd_plist():
+    '''Returns a dict containing model and asd version'''
+    asd_plist = \
+        'https://raw.github.com/chilcote/warranty/master/' + \
+        'com.github.chilcote.warranty.plist'
+    response = urllib.urlopen(asd_plist)
+    return plistlib.readPlist(response)
+
+def get_serial():
+    '''Returns the serial number of this Mac'''
+    print 'Using this machine\'s serial number.'
+    output = subprocess.check_output(['/usr/sbin/ioreg', '-c', 
+                                    'IOPlatformExpertDevice', '-d', '2'])
+    for line in output.splitlines():
+        if 'IOPlatformSerialNumber' in line:
+            return line.split(' = ')[1].replace('\"','')
+    return None
+
+def scrape_warranty_site(serial, debug=False):
+    '''Returns raw html from apple's warranty site'''
+    # got this code from: https://github.com/pudquick/pyMacWarranty
+    warranty_status = requests.get('https://selfsolve.apple.com/wcResults.do',
+        params={'sn': serial, 'Continue': 'Continue', 'cn': '', 'locale': '', 
+                                        'caller': '', 'num': '0'}).content
+    if debug:
+        print warranty_status
+        sys.exit(0)
+    if 'serial number is not valid' in warranty_status:
+        print 'Serial number is not valid: %s' % serial
+        sys.exit(0)
+    eligible = True
+    for line in warranty_status.splitlines():
+        if 'warrantyPage.warrantycheck.displayProductInfo' in line:
+            model = line.split('displayProductInfo(')[1].split('\'')[3]
+            if 'OBS,' in model:
+                model = model.replace('OBS,','')
+        if 'warrantyPage.warrantycheck.displayEligibilityInfo' in line:
+            if 'is not eligible' in line:
+                eligible = False
+    if eligible:
+        for line in warranty_status.splitlines():
+            if 'warrantyPage.warrantycheck.displayPHSupportInfo' in line:
+                date = parser.parse(line.split('Date: ')[1].split('<br/')[0])
+            if 'warrantyPage.warrantycheck.displayHWSupportInfo' in line:
+                status = line.split('Coverage: ')[1].split('\',')[0]
+    else:
+        date = 'Expired'
+        status = 'Inactive'
+    return model, date, status  
+
+def main():
+    '''Main method'''
+    serials = []
+    warranty = []
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input', help='import serials from a file')
+    parser.add_argument('-o', '--output', help='save output to a csv file')
+    parser.add_argument('serials', nargs=argparse.REMAINDER)
+    args = parser.parse_args()
+    if args.input:
+        print 'Importing serials from file: %s' % args.input
+        f = open(args.input, 'r')
+        for line in f.read().splitlines():
+            serials.append(line)
+    elif args.serials:
+        serials = args.serials
+    else:
+        serials.append(get_serial())
+    d = get_asd_plist()
+    for serial in serials:
+        # (model, date, status) = scrape_warranty_site(serial, debug=True)
+        (model, date, status) = scrape_warranty_site(serial)
+        if model in d:
+            asd = d[model]
+        else:
+            asd = 'Undetermined'
+        warranty.append([serial.upper(), model, str(date).split(' ')[0], status, asd])
+    if args.output:
+        print 'Saving out to file: %s' % args.output
+        f = open(args.output, 'w')
+        f.write('Serial Number,Product Description,Expires,Status,ASD Version\n')
+        f.close()
+        for i in warranty:
+            f = open(args.output, 'a')
+            f.write('%s,"%s",%s,%s,%s\n' % (i[0], i[1], i[2], i[3], i[4]))
+            f.close()
+    else:
+        for i in warranty:
+            print 'Serial Number:\t\t%s' % i[0]
+            print 'Product Description:\t%s' % i[1]
+            print 'Expires:\t\t%s' % i[2]
+            print 'ASD Version:\t\t%s\n' % i[4]
+
+if __name__ == '__main__':
+  main()
