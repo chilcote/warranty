@@ -45,7 +45,6 @@ import sys
 import subprocess
 import plistlib
 from dateutil import parser
-from optparse import OptionParser
 import argparse
 
 # inspired by @mikeymikey -- https://github.com/pudquick/pyMacWarranty
@@ -133,6 +132,8 @@ def main():
         serials.append(get_serial())
     d = get_asd_plist()
     for serial in serials:
+        if args.input:
+            print 'Processing: %s' % serial
         # (model, date, status) = scrape_warranty_site(serial, debug=True)
         (model, date, status) = scrape_warranty_site(serial)
         if model in d:
@@ -141,7 +142,7 @@ def main():
             asd = 'Undetermined'
         warranty.append([serial.upper(), model, str(date).split(' ')[0], status, asd])
     if args.output:
-        print 'Saving out to file: %s' % args.output
+        print 'Writing out to file: %s' % args.output
         f = open(args.output, 'w')
         f.write('Serial Number,Product Description,Expires,Status,ASD Version\n')
         f.close()
