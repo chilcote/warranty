@@ -4,7 +4,7 @@ warranty
 Apple warranty lookup script.
 
 This script scrapes Apple's warranty self serve site to determine whether a
-given serial number is under warranty. Input can be one or more given 
+given serial number is under warranty. Input can be one or more given
 serial numbers, or a text file listing serials. Output can be standard out
 or a CSV file.
 
@@ -13,18 +13,26 @@ All of the good ideas herein came from [glarizza][1], except for the rest of the
 Usage
 -----------
 
-	usage: warranty [-h] [-i INPUT] [-o OUTPUT] ...
+	usage: warranty [-h] [-v] [--quit-on-error] [-i INPUT] [-o OUTPUT] ...
 
 	positional arguments:
 	  serials
 
 	optional arguments:
 	  -h, --help            show this help message and exit
+	  -v, --verbose         print output to console while writing to file
+	  --quit-on-error       if an error is encountered
 	  -i INPUT, --input INPUT
 	                        import serials from a file
 	  -o OUTPUT, --output OUTPUT
 	                        save output to a csv file
 
+Updates
+-------
+
+	Updated September 22, 2014 by Pierce Darragh.
+	New version now can handle large lists with bad serial numbers.
+	Also outputs information during runtime.
 
 License
 -------
