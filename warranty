@@ -129,6 +129,23 @@ def scrape_warranty_site(serial, graceful=True):
         status = 'Inactive'
     return model, date, status
 
+def file_output(file, warranty_info):
+    with open(file, 'a') as f:
+        f.write('{},"{}",{},{},{}\n'.format(
+            warranty_info[0],
+            warranty_info[1],
+            warranty_info[2],
+            warranty_info[3],
+            warranty_info[4])
+        )
+
+def warranty_output(warranty_info):
+    print('Serial Number:       {}'.format(warranty_info[0]))
+    print('Product Description: {}'.format(warranty_info[1]))
+    print('Expires:             {}'.format(warranty_info[2]))
+    print('Status:              {}'.format(warranty_info[3]))
+    print('ASD Version:         {}\n'.format(warranty_info[4]))
+
 def main():
     '''Main method'''
     serials = []
@@ -170,27 +187,6 @@ def main():
                 warranty_output(warranty[-1])
         else:
             warranty_output(warranty[-1])
-    else:
-        for i in warranty:
-            warranty_output(i)
-
-def file_output(file, warranty_info):
-    with open(file, 'a') as f:
-        f.write('{},"{}",{},{},{}\n'.format(
-            warranty_info[0],
-            warranty_info[1],
-            warranty_info[2],
-            warranty_info[3],
-            warranty_info[4])
-        )
-
-def warranty_output(warranty_info):
-    print('Serial Number:       {}'.format(warranty_info[0]))
-    print('Product Description: {}'.format(warranty_info[1]))
-    print('Expires:             {}'.format(warranty_info[2]))
-    print('Status:              {}'.format(warranty_info[3]))
-    print('ASD Version:         {}\n'.format(warranty_info[4]))
-    print('#' * 80)
 
 if __name__ == '__main__':
     main()
