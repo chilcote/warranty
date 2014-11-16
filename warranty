@@ -115,6 +115,8 @@ def scrape_warranty_site(serial, graceful=True):
             model = line.split('displayProductInfo(')[1].split('\'')[3]
             if 'OBS,' in model:
                 model = model.replace('OBS,','')
+            if '~VIN,' in model:
+                model = model.replace('~VIN,','')
         if 'warrantyPage.warrantycheck.displayEligibilityInfo' in line:
             if 'is not eligible' in line:
                 eligible = False
