@@ -170,17 +170,17 @@ def main():
     d = get_asd_plist()
     if args.output:
         print('Writing out to file: {}'.format(args.output))
-        
         with open(args.output, 'w') as f:
             f.write('Serial Number,Product Description,Expires,Status,ASD Version\n')
     for serial in serials:
         if args.input:
             print('Processing: {}'.format(serial))
         (model, date, status) = scrape_warranty_site(serial, not args.quit_on_error)
-        if model in d:
-            asd = d[model]
-        else:
-            asd = 'Undetermined'
+        asd = 'Undetermined'
+        for k, v in d.items():
+            if model.upper() in k.upper():
+                asd = v
+                break
         warranty.append([serial.upper(), model, str(date).split(' ')[0], status, asd])
         if args.output:
             file_output(args.output, warranty[-1])
