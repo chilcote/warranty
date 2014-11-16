@@ -78,7 +78,7 @@ except:
 def get_asd_plist():
     '''Returns a dict containing model and asd version'''
     asd_plist = \
-        'https://raw.github.com/chilcote/warranty/master/' + \
+        'https://raw.githubusercontent.com/chilcote/warranty/master/' + \
         'com.github.chilcote.warranty.plist'
     response = urllib.urlopen(asd_plist)
     return plistlib.readPlist(response)
