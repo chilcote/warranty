@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>MacBook Air (13-inch, Early 2014)</key>
+	<string>3S156</string>
+	<key>MacBook Air (11-inch, Early 2014)</key>
+	<string>3S156</string>
 	<key>Mac Pro</key>
 	<string>3S108</string>
 	<key>Mac Pro (Early 2008)</key>
@@ -18,9 +22,17 @@
 	<string>3S149</string>
 	<key>Mac Pro (Mid 2012) with Mac OS X Server</key>
 	<string>3X109</string>
-	<key>Mac Pro 8x</key>
+	<key>Mac Pro (8x)</key>
 	<string>3S116</string>
 	<key>Mac mini (Early 2006)</key>
+	<string>3S108</string>
+	<key>iMac (17-inch, Early 2006)</key>
+	<string>3S108</string>
+	<key>iMac (20-inch, Early 2006)</key>
+	<string>3S108</string>
+	<key>iMac (17-inch, Mid 2006)</key>
+	<string>3S108</string>
+	<key>iMac (17-inch, Late 2006)</key>
 	<string>3S108</string>
 	<key>Mac mini (Late 2006)</key>
 	<string>3S108</string>
@@ -38,13 +50,15 @@
 	<string>3S157</string>
 	<key>Mac mini Server (Mid 2011)</key>
 	<string>3X109</string>
+	<key>Mac mini Server (Mid 2010)</key>
+	<string>3X107</string>
 	<key>MacBook (13-inch Early 2008)</key>
 	<string>3S123</string>
-	<key>MacBook (13-inch Late 2006)</key>
+	<key>MacBook (13-inch, Late 2006)</key>
 	<string>3S116</string>
 	<key>MacBook (13-inch Late 2007)</key>
 	<string>3S123</string>
-	<key>MacBook (13-inch Mid 2007)</key>
+	<key>MacBook (13-inch, Mid 2007)</key>
 	<string>3S116</string>
 	<key>MacBook (13-inch)</key>
 	<string>3S108</string>
@@ -69,15 +83,15 @@
 	<key>MacBook Air (11-inch, Mid 2012)</key>
 	<string>3S155</string>
 	<key>MacBook Air (11-inch, Mid 2013)</key>
-	<string>S3156</string>
+	<string>3S156</string>
 	<key>MacBook Air (13-inch, Late 2010)</key>
 	<string>3S142</string>
 	<key>MacBook Air (13-inch, Mid 2011)</key>
 	<string>3S146</string>
 	<key>MacBook Air (13-inch, Mid 2012)</key>
 	<string>3S155</string>
-	<key>MacBook Air (13-inch,Mid 2013)</key>
-	<string>S3156</string>
+	<key>MacBook Air (13-inch, Mid 2013)</key>
+	<string>3S156</string>
 	<key>MacBook Air (Late 2008)</key>
 	<string>3S132A</string>
 	<key>MacBook Air (Mid 2009)</key>
@@ -96,11 +110,15 @@
 	<string>3S155</string>
 	<key>MacBook Pro (15-inch 2.4/2.2GHz)</key>
 	<string>3S116</string>
-	<key>MacBook Pro (15-inch Core 2 Duo)</key>
+	<key>MacBook Pro (15-inch, Core 2 Duo)</key>
+	<string>3S116</string>
+	<key>MacBook Pro (15-inch, 2.4/2.2 GHz)</key>
 	<string>3S116</string>
 	<key>MacBook Pro (15-inch Early 2008)</key>
 	<string>3S123</string>
 	<key>MacBook Pro (15-inch Glossy)</key>
+	<string>3S108</string>
+	<key>MacBook Pro (15-inch)</key>
 	<string>3S108</string>
 	<key>MacBook Pro (15-inch, 2.53GHz, Mid 2009)</key>
 	<string>3S132A</string>
@@ -112,13 +130,17 @@
 	<string>3S148</string>
 	<key>MacBook Pro (15-inch, Mid 2009)</key>
 	<string>3S132A</string>
+	<key>MacBook Pro (15-inch, 2.53 GHz, Mid 2009)</key>
+	<string>3S132A</string>
 	<key>MacBook Pro (15-inch, Mid 2010)</key>
 	<string>3S138</string>
 	<key>MacBook Pro (15-inch, Mid 2012)</key>
 	<string>3S155</string>
 	<key>MacBook Pro (17-inch 2.4GHz)</key>
 	<string>3S116</string>
-	<key>MacBook Pro (17-inch Core 2 Duo)</key>
+	<key>MacBook Pro (17-inch, 2.4 GHz)</key>
+	<string>3S116</string>
+	<key>MacBook Pro (17-inch, Core 2 Duo)</key>
 	<string>3S116</string>
 	<key>MacBook Pro (17-inch Early 2008)</key>
 	<string>3S123</string>
@@ -136,17 +158,23 @@
 	<string>3S132A</string>
 	<key>MacBook Pro (17-inch, Mid 2010)</key>
 	<string>3S138</string>
+	<key>MacBook Pro (Retina, 13-inch, Late 2012)</key>
+	<string>3S155</string>
 	<key>MacBook Pro (Retina, 13-inch, Early 2013)</key>
 	<string>3S155</string>
 	<key>MacBook Pro (Retina, 13-inch, Late 2013)</key>
-	<string>3S158</string>
+	<string>3S162</string>
 	<key>MacBook Pro (Retina, 15-inch, Early 2013)</key>
 	<string>3S155</string>
 	<key>MacBook Pro (Retina, 15-inch, Late 2013)</key>
-	<string>3S158</string>
+	<string>3S162</string>
+	<key>MacBook Pro (Retina, 13-inch, Mid 2014)</key>
+	<string>3S162</string>
+	<key>MacBook Pro (Retina, 15-inch, Mid 2014)</key>
+	<string>3S162</string>
 	<key>MacBook Pro (Retina, Mid 2012)</key>
 	<string>3S155</string>
-	<key>MacMini (Early 2009)</key>
+	<key>Mac mini (Early 2009)</key>
 	<string>3S132A</string>
 	<key>Xserve (Early 2008)</key>
 	<string>3X106</string>
@@ -154,7 +182,9 @@
 	<string>3X106</string>
 	<key>Xserve (Late 2006)</key>
 	<string>3X102</string>
-	<key>iMac (17-inch Late 2006 CD)</key>
+	<key>iMac (17-inch, Late 2006, CD)</key>
+	<string>3S108</string>
+	<key>iMac (20-inch, Late 2006)</key>
 	<string>3S108</string>
 	<key>iMac (17-inch Late 2006)</key>
 	<string>3S108</string>
