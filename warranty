@@ -120,13 +120,12 @@ def scrape_warranty_site(serial, graceful=True):
                 eligible = False
     if eligible:
         for line in warranty_status.splitlines():
-            if 'warrantyPage.warrantycheck.displayPHSupportInfo' in line:
-                date = parser.parse(line.split('Date: ')[1].split('<br/')[0])
             if 'warrantyPage.warrantycheck.displayHWSupportInfo' in line:
+                date = parser.parse(line.split('Date: ')[1].split('<br/')[0])
                 status = line.split('Coverage: ')[1].split('\',')[0]
     else:
-        date   = 'Expired'
-        status = 'Inactive'
+        date, status   = 'Expired', 'Inactive'
+
     return model, date, status
 
 def file_output(file, warranty_info):
