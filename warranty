@@ -15,16 +15,6 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 ##############################################################################
-# Updates
-#
-# September 23, 2014 [Pierce Darragh]
-#  * variable instantiation in scrape_warranty_site
-#  * fixed output
-#  * fixed error handling (can continue despite errors)
-#  * more pythonic
-#  * added 'verbose' flag (prints output to console and file)
-#  * added 'quit-on-error' flag (if an error is encountered, terminate)
-#  * no more use of `f = open(file)`; replaced by `with open(file) as f`
 
 ## Warranty site
 ## https://selfsolve.apple.com/wcResults.do?sn=SERIAL&Continue=Continue&cn=&locale=&caller=&num=0
@@ -59,35 +49,20 @@ import subprocess
 import plistlib
 from dateutil import parser
 import argparse
-
-# inspired by @mikeymikey -- https://github.com/pudquick/pyMacWarranty
-import xml.etree.ElementTree as ET
-try:
-    import requests
-except:
-    import urllib, types
-    import urllib2 as requests
-    setattr(requests,'content','')
-    def get(self, urlstr, params={}):
-        if (params):
-            urlstr += "?{}".format(urllib.urlencode(params))
-        self.content = self.urlopen(urlstr).read()
-        return self
-    requests.get = types.MethodType(get,requests)
+import urllib2
 
 def get_asd_plist():
     '''Returns a dict containing model and asd version'''
     asd_plist = \
-        'https://raw.githubusercontent.com/chilcote/warranty/master/' + \
-        'com.github.chilcote.warranty.plist'
-    response = urllib.urlopen(asd_plist)
+        'https://raw.githubusercontent.com/chilcote/warranty/master/com.github.chilcote.warranty.plist'
+    response = urllib2.urlopen(asd_plist)
     return plistlib.readPlist(response)
 
 def get_serial():
     '''Returns the serial number of this Mac'''
     print('Using this machine\'s serial number.')
-    output = subprocess.check_output(['/usr/sbin/ioreg', '-c',
-                                    'IOPlatformExpertDevice', '-d', '2'])
+    cmd = ['/usr/sbin/ioreg', '-c', 'IOPlatformExpertDevice', '-d', '2']
+    output = subprocess.check_output(cmd)
     for line in output.splitlines():
         if 'IOPlatformSerialNumber' in line:
             return line.split(' = ')[1].replace('\"','')
@@ -95,15 +70,10 @@ def get_serial():
 
 def scrape_warranty_site(serial, graceful=True):
     '''Returns raw html from apple's warranty site'''
-    # got this code from: https://github.com/pudquick/pyMacWarranty
-    warranty_status = requests.get('https://selfsolve.apple.com/wcResults.do',
-        params={'sn': serial, 'Continue': 'Continue', 'cn': '', 'locale': '',
-                                        'caller': '', 'num': '0'}).content
-    
-    # instantiate return values to prevent errors
-    model  = ''
-    date   = ''
-    status = ''
+    url = 'https://selfsolve.apple.com/wcResults.do?sn={}&Continue=Continue&cn=&local=&caller=&num=0'.format(serial)
+    warranty_status = urllib2.urlopen(url).read()
+
+    model, date, status  = '', '', ''
 
     if 'serial number is not valid' in warranty_status:
         print('Serial number is not valid: {}'.format(serial))
