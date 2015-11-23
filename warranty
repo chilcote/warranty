@@ -16,16 +16,15 @@
 #  under the License.
 ##############################################################################
 
-## Warranty site
-## https://selfsolve.apple.com/wcResults.do?sn=SERIAL&Continue=Continue&cn=&locale=&caller=&num=0
+## Much of this code is forked from by Mike Lynn's work here:
+## https://github.com/pudquick/pyMacWarranty/blob/master/getwarranty.py
 
 '''
-Apple warranty lookup script.
+Apple warranty estimation script.
 
-This script scrapes Apple's warranty self serve site to determine whether a
-given serial number is under warranty. Input can be one or more given
-serial numbers, or a text file listing serials. Output can be standard out
-or a CSV file.
+This script estimates whether a given serial number is under warranty.
+Input can be one or more given serial numbers, or a text file listing serials.
+Output can be standard out or a CSV file.
 
 usage: warranty [-h] [-v] [--quit-on-error] [-i INPUT] [-o OUTPUT] ...
 
@@ -50,6 +49,9 @@ import plistlib
 from dateutil import parser
 import argparse
 import urllib2
+import datetime
+import time
+import xml.etree.ElementTree as ET
 
 def get_asd_plist():
     '''Returns a dict containing model and asd version'''
@@ -68,54 +70,88 @@ def get_serial():
             return line.split(' = ')[1].replace('\"','')
     return None
 
-def scrape_warranty_site(serial, graceful=True):
-    '''Returns raw html from apple's warranty site'''
-    url = 'https://selfsolve.apple.com/wcResults.do?sn={}&Continue=Continue&cn=&local=&caller=&num=0'.format(serial)
-    warranty_status = urllib2.urlopen(url).read()
+def apple_year_offset(dateobj, years=0):
+    # Convert to a maleable format
+    mod_time = dateobj.timetuple()
+    # Offset year by number of years
+    mod_time = time.struct_time(tuple([mod_time[0]+years]) + mod_time[1:])
+    # Convert back to a datetime obj
+    return datetime.datetime.fromtimestamp(int(time.mktime(mod_time)))
 
-    model, date, status  = '', '', ''
+def manufacture_date(serial, graceful=True):
+    '''returns the estimated manufacture date of the Mac'''
+    # http://www.macrumors.com/2010/04/16/apple-tweaks-serial-number-format-with-new-macbook-pro/
+    est_date = u''
+    if 10 < len(serial) < 13:
+        if len(serial) == 11:
+            # Old format
+            year = serial[2].lower()
+            est_year = 2000 + '   3456789012'.index(year)
+            week = int(serial[3:5]) - 1
+            year_time = datetime.date(year=est_year, month=1, day=1)
+            if (week):
+                week_dif = datetime.timedelta(weeks=week)
+                year_time += week_dif
+        else:
+            # New format
+            alpha_year = 'cdfghjklmnpqrstvwxyz'
+            year = serial[3].lower()
+            est_year = 2010 + (alpha_year.index(year) / 2)
+            # 1st or 2nd half of the year
+            est_half = alpha_year.index(year) % 2
+            week = serial[4].lower()
+            alpha_week = ' 123456789cdfghjklmnpqrtvwxy'
+            est_week = alpha_week.index(week) + (est_half * 26) - 1
+            year_time = datetime.date(year=est_year, month=1, day=1)
+            if (est_week):
+                week_dif = datetime.timedelta(weeks=est_week)
+                year_time += week_dif
+    return apple_year_offset(year_time).strftime('%Y-%m-%d')
 
-    if 'serial number is not valid' in warranty_status:
-        print('Serial number is not valid: {}'.format(serial))
-        if not graceful:
-            sys.exit(0)
-    eligible = True
-    for line in warranty_status.splitlines():
-        if 'warrantyPage.warrantycheck.displayProductInfo' in line:
-            model = line.split('displayProductInfo(')[1].split('\'')[3]
-            if 'OBS,' in model:
-                model = model.replace('OBS,','')
-            if '~VIN,' in model:
-                model = model.replace('~VIN,','')
-        if 'warrantyPage.warrantycheck.displayEligibilityInfo' in line:
-            if 'is not eligible' in line:
-                eligible = False
-    if eligible:
-        for line in warranty_status.splitlines():
-            if 'warrantyPage.warrantycheck.displayHWSupportInfo' in line:
-                date = parser.parse(line.split('Date: ')[1].split('<br/')[0])
-                status = line.split('Coverage: ')[1].split('\',')[0]
+def get_model(serial):
+    if (len(serial) == 11):
+        snippet = serial[-3:]
+    elif (len(serial) == 12):
+        snippet = serial[-4:]
+    elif (2 < len(serial) < 5):
+        snippet = serial
     else:
-        date, status   = 'Expired', 'Inactive'
+        return None
+    try:
+        url = 'http://support-sp.apple.com/sp/product?cc=%s&lang=en_US' % snippet
+        model = ET.fromstring(urllib2.urlopen(url).read()).find('configCode').text
+    except:
+        return None
+    return model
 
-    return model, date, status
+def get_est_warranty(manufactured_date):
+    return (u'' + apple_year_offset(parser.parse(manufactured_date), 3).strftime('%Y-%m-%d'),
+            u'' + apple_year_offset(parser.parse(manufactured_date), 1).strftime('%Y-%m-%d'))
+
+def get_est_status(est_date):
+    if (datetime.datetime.now() > parser.parse(est_date)):
+        return "EXPIRED"
+    else:
+        return "COVERED"
 
 def file_output(file, warranty_info):
     with open(file, 'a') as f:
-        f.write('{},"{}",{},{},{}\n'.format(
+        f.write('{},"{}",{},{},{},{}\n'.format(
             warranty_info[0],
             warranty_info[1],
             warranty_info[2],
             warranty_info[3],
-            warranty_info[4])
+            warranty_info[4],
+            warranty_info[5])
         )
 
 def warranty_output(warranty_info):
     print('Serial Number:       {}'.format(warranty_info[0]))
     print('Product Description: {}'.format(warranty_info[1]))
-    print('Expires:             {}'.format(warranty_info[2]))
-    print('Status:              {}'.format(warranty_info[3]))
-    print('ASD Version:         {}\n'.format(warranty_info[4]))
+    print('Est. Manufactured:   {}'.format(warranty_info[2]))
+    print('Est. AppleCare:      {}'.format(warranty_info[3]))
+    print('Est. Warranty:       {}'.format(warranty_info[4]))
+    print('ASD Version:         {}\n'.format(warranty_info[5]))
 
 def main():
     '''Main method'''
@@ -128,6 +164,7 @@ def main():
     parser.add_argument('-o', '--output', help='save output to a csv file')
     parser.add_argument('serials', nargs=argparse.REMAINDER)
     args = parser.parse_args()
+
     if args.input:
         print('Importing serials from file: {}'.format(args.input))
         f = open(args.input, 'r')
@@ -144,17 +181,22 @@ def main():
     if args.output:
         print('Writing out to file: {}'.format(args.output))
         with open(args.output, 'w') as f:
-            f.write('Serial Number,Product Description,Expires,Status,ASD Version\n')
+            f.write('Serial Number,Product Description,Manufactured,Applecare,Warranty,ASD Version\n')
+
     for serial in serials:
         if args.input:
             print('Processing: {}'.format(serial))
-        (model, date, status) = scrape_warranty_site(serial, not args.quit_on_error)
+        date, status = manufacture_date(serial, not args.quit_on_error), ''
+        model = get_model(serial)
+        est_applecare, est_warranty = get_est_warranty(date)
+        est_applecare_status = get_est_status(est_applecare)
+        est_warranty_status = get_est_status(est_warranty)
         asd = 'Undetermined'
         for k, v in d.items():
             if model.upper() in k.upper():
                 asd = v
                 break
-        warranty.append([serial.upper(), model, str(date).split(' ')[0], status, asd])
+        warranty.append([serial.upper(), model, str(date).split(' ')[0], est_applecare_status, est_warranty_status, asd])
         if args.output:
             file_output(args.output, warranty[-1])
             if args.verbose:
