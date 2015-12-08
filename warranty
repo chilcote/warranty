@@ -108,6 +108,11 @@ def manufacture_date(serial, graceful=True):
                 year_time += week_dif
     return apple_year_offset(year_time).strftime('%Y-%m-%d')
 
+def get_days_old(manufactured_date):
+    today = datetime.datetime.now()
+    manu = parser.parse(manufactured_date)
+    return (today - manu).days
+
 def get_model(serial):
     if (len(serial) == 11):
         snippet = serial[-3:]
@@ -136,13 +141,14 @@ def get_est_status(est_date):
 
 def file_output(file, warranty_info):
     with open(file, 'a') as f:
-        f.write('{},"{}",{},{},{},{}\n'.format(
+        f.write('{},"{}",{},{},{},{},{}\n'.format(
             warranty_info[0],
             warranty_info[1],
             warranty_info[2],
             warranty_info[3],
             warranty_info[4],
-            warranty_info[5])
+            warranty_info[5],
+            warranty_info[6])
         )
 
 def warranty_output(warranty_info):
@@ -151,7 +157,8 @@ def warranty_output(warranty_info):
     print('Est. Manufactured:   {}'.format(warranty_info[2]))
     print('Est. AppleCare:      {}'.format(warranty_info[3]))
     print('Est. Warranty:       {}'.format(warranty_info[4]))
-    print('ASD Version:         {}\n'.format(warranty_info[5]))
+    print('Est. Days Old:       {}'.format(warranty_info[5]))
+    print('ASD Version:         {}\n'.format(warranty_info[6]))
 
 def main():
     '''Main method'''
@@ -181,12 +188,13 @@ def main():
     if args.output:
         print('Writing out to file: {}'.format(args.output))
         with open(args.output, 'w') as f:
-            f.write('Serial Number,Product Description,Manufactured,Applecare,Warranty,ASD Version\n')
+            f.write('Serial Number,Product Description,Manufactured,Applecare,Warranty,Age,ASD Version\n')
 
     for serial in serials:
         if args.input:
             print('Processing: {}'.format(serial))
         date, status = manufacture_date(serial, not args.quit_on_error), ''
+        est_days_old = get_days_old(date)
         model = get_model(serial)
         est_applecare, est_warranty = get_est_warranty(date)
         est_applecare_status = get_est_status(est_applecare)
@@ -196,7 +204,7 @@ def main():
             if model.upper() in k.upper():
                 asd = v
                 break
-        warranty.append([serial.upper(), model, str(date).split(' ')[0], est_applecare_status, est_warranty_status, asd])
+        warranty.append([serial.upper(), model, str(date).split(' ')[0], est_applecare_status, est_warranty_status, est_days_old, asd])
         if args.output:
             file_output(args.output, warranty[-1])
             if args.verbose:
