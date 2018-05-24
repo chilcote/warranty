@@ -125,7 +125,8 @@ def get_model(serial):
     try:
         url = 'http://support-sp.apple.com/sp/product?cc=%s&lang=en_US' % snippet
         model = ET.fromstring(urllib2.urlopen(url).read()).find('configCode').text
-    except:
+    except Exception:
+        print Exception
         return None
     return model
 
@@ -200,10 +201,11 @@ def main():
         est_applecare_status = get_est_status(est_applecare)
         est_warranty_status = get_est_status(est_warranty)
         asd = 'Undetermined'
-        for k, v in d.items():
-            if model.upper() in k.upper():
-                asd = v
-                break
+        if model:
+            for k, v in d.items():
+                if model.upper() in k.upper():
+                    asd = v
+                    break
         warranty.append([serial.upper(), model, str(date).split(' ')[0], est_applecare_status, est_warranty_status, est_days_old, asd])
         if args.output:
             file_output(args.output, warranty[-1])
