@@ -56,6 +56,24 @@ except ImportError:
     from plistlib import loads as readPlistFromString
 
 
+def build_args():
+    """Parse and return command line arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="print output to console while writing to file",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--quit-on-error", help="if an error is encountered", action="store_true"
+    )
+    parser.add_argument("-i", "--input", help="import serials from a file")
+    parser.add_argument("-o", "--output", help="save output to a csv file")
+    parser.add_argument("serials", nargs=argparse.REMAINDER)
+    return parser.parse_args()
+
+
 def get_asd_plist():
     """Returns a dict containing model and asd version."""
     asd_plist = "https://raw.githubusercontent.com/chilcote/warranty/master/com.github.chilcote.warranty.plist"
@@ -184,20 +202,7 @@ def main():
     """Main method."""
     serials = []
     warranty = []
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        help="print output to console while writing to file",
-        action="store_true",
-    )
-    parser.add_argument(
-        "--quit-on-error", help="if an error is encountered", action="store_true"
-    )
-    parser.add_argument("-i", "--input", help="import serials from a file")
-    parser.add_argument("-o", "--output", help="save output to a csv file")
-    parser.add_argument("serials", nargs=argparse.REMAINDER)
-    args = parser.parse_args()
+    args = build_args()
 
     if args.input:
         print("Importing serials from file: {}".format(args.input))
