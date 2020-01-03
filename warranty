@@ -49,10 +49,11 @@ import time
 import xml.etree.ElementTree as ET
 
 try:
-    from urllib2 import urlopen  # python 2
+    from urllib2 import urlopen, HTTPError  # python 2
     from plistlib import readPlistFromString
 except ImportError:
     from urllib.request import urlopen  # python 3
+    from urllib.error import HTTPError
     from plistlib import loads as readPlistFromString
 
 
@@ -152,7 +153,7 @@ def get_model(serial):
     try:
         url = "http://support-sp.apple.com/sp/product?cc=%s&lang=en_US" % snippet
         model = ET.fromstring(urlopen(url).read()).find("configCode").text
-    except Exception as err:
+    except HTTPError as err:
         print(str(err))
         return None
     return model
