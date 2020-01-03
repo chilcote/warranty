@@ -20,8 +20,7 @@
 ## Much of this code is forked from by Mike Lynn's work here:
 ## https://github.com/pudquick/pyMacWarranty/blob/master/getwarranty.py
 
-"""
-Apple warranty estimation script.
+"""Apple warranty estimation script.
 
 This script estimates whether a given serial number is under warranty.
 Input can be one or more given serial numbers, or a text file listing serials.
@@ -40,33 +39,38 @@ optional arguments:
                         import serials from a file
   -o OUTPUT, --output OUTPUT
                         save output to a csv file
-
 """
 
 import argparse
 import datetime
-import plistlib
 import subprocess
 import sys
 import time
-import urllib2
 import xml.etree.ElementTree as ET
 
-from dateutil import parser
+try:
+    from urllib2 import urlopen  # python 2
+    from plistlib import readPlistFromString
+except ImportError:
+    from urllib.request import urlopen  # python 3
+    from plistlib import loads as readPlistFromString
 
 
 def get_asd_plist():
-    """Returns a dict containing model and asd version"""
+    """Returns a dict containing model and asd version."""
     asd_plist = "https://raw.githubusercontent.com/chilcote/warranty/master/com.github.chilcote.warranty.plist"
-    response = urllib2.urlopen(asd_plist)
-    return plistlib.readPlist(response)
+    response = urlopen(asd_plist)
+    if response:
+        asd_plist = response.read()
+        return readPlistFromString(asd_plist)
+    return None
 
 
 def get_serial():
-    """Returns the serial number of this Mac"""
+    """Returns the serial number of this Mac."""
     print("Using this machine's serial number.")
     cmd = ["/usr/sbin/ioreg", "-c", "IOPlatformExpertDevice", "-d", "2"]
-    output = subprocess.check_output(cmd)
+    output = subprocess.check_output(cmd).decode()
     for line in output.splitlines():
         if "IOPlatformSerialNumber" in line:
             return line.split(" = ")[1].replace('"', "")
@@ -74,7 +78,7 @@ def get_serial():
 
 
 def apple_year_offset(dateobj, years=0):
-    # Convert to a maleable format
+    # Convert to a malleable format
     mod_time = dateobj.timetuple()
     # Offset year by number of years
     mod_time = time.struct_time(tuple([mod_time[0] + years]) + mod_time[1:])
@@ -83,7 +87,7 @@ def apple_year_offset(dateobj, years=0):
 
 
 def manufacture_date(serial, graceful=True):
-    """returns the estimated manufacture date of the Mac"""
+    """returns the estimated manufacture date of the Mac."""
     # http://www.macrumors.com/2010/04/16/apple-tweaks-serial-number-format-with-new-macbook-pro/
     if 10 < len(serial) < 13:
         if len(serial) == 11:
@@ -105,7 +109,7 @@ def manufacture_date(serial, graceful=True):
             week = serial[4].lower()
             alpha_week = " 123456789cdfghjklmnpqrtvwxy"
             est_week = alpha_week.index(week) + (est_half * 26) - 1
-            year_time = datetime.date(year=est_year, month=1, day=1)
+            year_time = datetime.date(year=int(est_year), month=1, day=1)
             if est_week:
                 week_dif = datetime.timedelta(weeks=est_week)
                 year_time += week_dif
@@ -114,7 +118,7 @@ def manufacture_date(serial, graceful=True):
 
 def get_days_old(manufactured_date):
     today = datetime.datetime.now()
-    manu = parser.parse(manufactured_date)
+    manu = datetime.datetime.strptime(manufactured_date, "%Y-%m-%d")
     return (today - manu).days
 
 
@@ -129,24 +133,23 @@ def get_model(serial):
         return None
     try:
         url = "http://support-sp.apple.com/sp/product?cc=%s&lang=en_US" % snippet
-        model = ET.fromstring(urllib2.urlopen(url).read()).find("configCode").text
-    except Exception:
-        print(Exception)
+        model = ET.fromstring(urlopen(url).read()).find("configCode").text
+    except Exception as err:
+        print(str(err))
         return None
     return model
 
 
 def get_est_warranty(manufactured_date):
+    manu = datetime.datetime.strptime(manufactured_date, "%Y-%m-%d")
     return (
-        u""
-        + apple_year_offset(parser.parse(manufactured_date), 3).strftime("%Y-%m-%d"),
-        u""
-        + apple_year_offset(parser.parse(manufactured_date), 1).strftime("%Y-%m-%d"),
+        u"" + apple_year_offset(manu, 3).strftime("%Y-%m-%d"),
+        u"" + apple_year_offset(manu, 1).strftime("%Y-%m-%d"),
     )
 
 
 def get_est_status(est_date):
-    if datetime.datetime.now() > parser.parse(est_date):
+    if datetime.datetime.now() > datetime.datetime.strptime(est_date, "%Y-%m-%d"):
         return "EXPIRED"
     else:
         return "COVERED"
@@ -178,7 +181,7 @@ def warranty_output(warranty_info):
 
 
 def main():
-    """Main method"""
+    """Main method."""
     serials = []
     warranty = []
     parser = argparse.ArgumentParser()
