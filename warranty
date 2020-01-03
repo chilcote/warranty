@@ -43,6 +43,7 @@ optional arguments:
 
 import argparse
 import datetime
+import os
 import subprocess
 import sys
 import time
@@ -77,8 +78,18 @@ def build_args():
 
 def get_asd_plist():
     """Returns a dict containing model and asd version."""
-    asd_plist = "https://raw.githubusercontent.com/chilcote/warranty/master/com.github.chilcote.warranty.plist"
-    response = urlopen(asd_plist)
+    # First try to read from local file.
+    plist_filename = "com.github.chilcote.warranty.plist"
+    if os.path.isfile(plist_filename):
+        with open(plist_filename, "rb") as openfile:
+            asd_plist = openfile.read()
+            return readPlistFromString(asd_plist)
+    # Next try to read from GitHub.
+    plist_url = (
+        "https://raw.githubusercontent.com/chilcote/"
+        "warranty/master/com.github.chilcote.warranty.plist"
+    )
+    response = urlopen(plist_url)
     if response:
         asd_plist = response.read()
         return readPlistFromString(asd_plist)
