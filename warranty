@@ -50,7 +50,7 @@ import time
 import xml.etree.ElementTree as ET
 
 try:
-    # Pytnon 2
+    # Python 2
     from plistlib import readPlistFromString
 except ImportError:
     # Python 3
