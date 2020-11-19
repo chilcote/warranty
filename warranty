@@ -98,8 +98,7 @@ def get_asd_plist():
         # Python 2
         response = subprocess.check_output(cmd).decode()
     if response:
-        asd_plist = response.read()
-        return readPlistFromString(asd_plist)
+        return readPlistFromString(response)
     return None
 
 
