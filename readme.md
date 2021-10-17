@@ -1,35 +1,35 @@
 warranty
 ========
 
-Apple warranty estimation script.
+Mac manufactured date estimation script.
 
-This script estimates whether a given serial number is under warranty.
+This script returns the serial, model identifier, and estimated manufacture date.
 Input can be one or more given serial numbers, or a text file listing serials.
-Output can be standard out or a CSV file.
 
-All of the good ideas herein came from [glarizza][1], except for the rest of the good ideas which came from [pudquick][2]. Every terrible idea is my own.
+This script would not be possible without great work provided by the community:
+- https://github.com/pudquick/pyMacdevice_info/blob/master/getdevice_info.py
+- http://www.macrumors.com/2010/04/16/apple-tweaks-serial-number-format-with-new-macbook-pro/
+- https://blog.kolide.com/determining-mac-hardware-manufacture-date-using-osquery-54091a9cccbb
 
 Usage
 -----
 
-	usage: warranty [-h] [-v] [--quit-on-error] [-i INPUT] [-o OUTPUT] ...
+```
+usage: warranty [-h] [-i INPUT] ...
 
-	positional arguments:
-	  serials
+positional arguments:
+  serials
 
-	optional arguments:
-	  -h, --help            show this help message and exit
-	  -v, --verbose         print output to console while writing to file
-	  --quit-on-error       if an error is encountered
-	  -i INPUT, --input INPUT
-	                        import serials from a file
-	  -o OUTPUT, --output OUTPUT
-	                        save output to a csv file
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        import serials from a file
+```
 
 License
 -------
 
-	Copyright © 2014-2020 Joseph Chilcote
+	Copyright © 2014-2021 Joseph Chilcote
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -42,6 +42,3 @@ License
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 	See the License for the specific language governing permissions and
 	limitations under the License.
-
-[1]: https://github.com/glarizza/scripts/blob/master/ruby/warranty.rb "glarizza"
-[2]: https://github.com/pudquick/pyMacWarranty/blob/master/getwarranty.py "pudquick"
