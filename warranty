@@ -104,9 +104,10 @@ def main():
         serials = args.serials
     else:
         serials.append(get_serial())
-        if not serials[0]:
-            print("Error: Invalid or no serial number detected.")
-            sys.exit(1)
+
+    if not serials:
+        print("Error: Invalid or no serial number detected.")
+        sys.exit(1)
 
     writer = csv.writer(sys.stdout)
 
